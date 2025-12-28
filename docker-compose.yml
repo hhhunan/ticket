@@ -1,0 +1,73 @@
+services:
+  app:
+    build:
+      args:
+        user: ticket
+        uid: 1000
+        gid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    image: ticket_app
+    container_name: ticket-app
+    restart: unless-stopped
+    environment:
+      - DB_HOST=db
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - media_data:/var/www/public/media
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - db
+    networks:
+      - ticket
+  webserver:
+    image: nginx:alpine
+    container_name: ticket-webserver
+    restart: unless-stopped
+    depends_on:
+      - app
+    working_dir: /var/www
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d/
+    networks:
+      - ticket
+  db:
+    image: mysql:8.0
+    container_name: ticket-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_USER=${DB_USERNAME}
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "33006:3306"
+    networks:
+      - ticket
+
+    # Redis for Cache and Queue
+  redis:
+    image: redis:alpine
+    container_name: ticket-redis
+    restart: unless-stopped
+    networks:
+      - ticket
+    ports:
+      - "6379:6379"
+networks:
+  ticket:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local
+  media_data:
+    driver: local
