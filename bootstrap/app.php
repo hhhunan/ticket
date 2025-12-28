@@ -10,6 +10,11 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->redirectGuestsTo('/login');
+        // Using a closure...
+        $middleware->redirectGuestsTo(fn (Request $request) => route('admin.login.form'));
+    })
     ->withMiddleware(function (Middleware $middleware): void {
         //
     })
