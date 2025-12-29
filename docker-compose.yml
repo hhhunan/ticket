@@ -58,16 +58,32 @@ services:
     image: redis:alpine
     container_name: ticket-redis
     restart: unless-stopped
-    networks:
-      - ticket
+    volumes:
+      - redis-data:/data
     ports:
       - "6379:6379"
+    networks:
+      - ticket
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: ticket-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    networks:
+      - ticket
+
+
 networks:
   ticket:
     driver: bridge
 
 volumes:
   db_data:
+    driver: local
+  redis-data:
     driver: local
   media_data:
     driver: local

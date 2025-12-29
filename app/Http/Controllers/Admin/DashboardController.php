@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -19,6 +20,13 @@ class DashboardController extends Controller
 
     public function index()
     {
-        return view('admin.dashboard');
+        $stats = [
+            'total' => Ticket::count(),
+            'new' => Ticket::where('status', 'new')->count(),
+            'in_progress' => Ticket::where('status', 'in_progress')->count(),
+            'processed' => Ticket::where('status', 'processed')->count(),
+        ];
+
+        return view('admin.dashboard', compact('stats'));
     }
 }

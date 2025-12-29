@@ -3,8 +3,6 @@ set -e
 
 echo "Настройка прав и запуск приложения..."
 
-echo "user : $user"
-
 chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 chmod -R 777 /var/www/storage/logs  # Особые права для логов
 
@@ -32,6 +30,7 @@ if [ "$DB_HOST" != "" ]; then
     done
 
     php artisan migrate --force
+    php artisan db:seed
 fi
 
 exec php-fpm

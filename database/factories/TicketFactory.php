@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\TicketStatus;
 use App\Models\Customer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -19,11 +20,14 @@ class TicketFactory extends Factory
     public function definition(): array
     {
         $customer = Customer::factory()->create();
+        $status = fake()->randomElement(TicketStatus::cases());
         return [
             'id'=>Str::ulid(),
             'subject' => fake()->jobTitle(),
-            'description' => fake()->text(),
+            'message' => fake()->sentence(10),
             'customer_id' => $customer->id,
+            'status' => $status->value,
+            'reply_date' => $status !== TicketStatus::NEW ? fake()->dateTime() : null,
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Enums;
 
 enum TicketStatus: string
 {
+
     case NEW = 'new';
     case IN_PROGRESS = 'in_progress';
     case PROCESSED = 'processed';
@@ -16,6 +17,13 @@ enum TicketStatus: string
             self::IN_PROGRESS => 'Ticket is progressing',
             self::PROCESSED => 'Ticket is processed',
         };
+    }
+
+    public static function toArray(): array
+    {
+        return array_map(function ($case) {
+            return $case->value;
+        }, self::cases());
     }
 
     public function color(): string

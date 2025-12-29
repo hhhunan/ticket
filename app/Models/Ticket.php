@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -21,11 +22,13 @@ class Ticket extends Model implements HasMedia
     use InteractsWithMedia;
 
     protected $keyType = 'string';
+
+    public $incrementing = false;
     protected $primaryKey = 'id';
 
     protected $fillable = [
         'subject',
-        'description',
+        'message',
         'customer_id',
         'status',
     ];
@@ -53,4 +56,65 @@ class Ticket extends Model implements HasMedia
             ->fit(Fit::Contain, 300, 300)
             ->nonQueued();
     }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('attachments')
+            ->acceptsMimeTypes([
+                'image/jpeg',
+                'image/png',
+                'image/gif',
+                'application/pdf',
+                'application/msword',
+            ])->onlyKeepLatest(5);
+    }
+
+    public function getAttachmentUrl(Media $media): string
+    {
+        return $media->getUrl();
+    }
+
+    public function scopeNew($query)
+    {
+        return $query->where('status', TicketStatus::NEW->value);
+    }
+
+    public function scopeInProgress($query)
+    {
+        return $query->where('status', TicketStatus::IN_PROGRESS->value);
+    }
+
+    public function scopeProcessed($query)
+    {
+        return $query->where('status', TicketStatus::PROCESSED->value);
+    }
+
+    public function scopeCreatedBetween($query, $from, $to)
+    {
+        return $query->whereBetween('created_at', [$from, $to]);
+    }
+
+    public function changeStatus(string $status): bool
+    {
+        if (!in_array($status, TicketStatus::toArray())) {
+            return false;
+        }
+        $this->status = $status;
+        $this->manager_id = Auth::id();
+
+        return $this->save();
+    }
+
+
+    /**
+     * Обработка загрузки файлов
+     */
+    public function addAttachments(array $files): void
+    {
+        foreach ($files as $file) {
+            $this->addMedia($file)
+                ->toMediaCollection('attachments');
+        }
+    }
+
 }

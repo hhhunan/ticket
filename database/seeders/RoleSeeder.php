@@ -27,7 +27,6 @@ class RoleSeeder extends Seeder
         Permission::create(['name' => 'reply to ticket']);
         Permission::create(['name' => 'delete ticket']);
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        // this can be done as separate statements
         $role = Role::create(['name' => 'manager']);
         $role->givePermissionTo(['edit ticket', 'view ticket', 'reply to ticket', 'delete ticket']);
 
