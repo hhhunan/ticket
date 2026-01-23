@@ -1,0 +1,255 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Ticket API",
+        "description": "API documentation for the Ticket system",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/tickets/statistics": {
+            "get": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Get ticket statistics",
+                "description": "Returns ticket statistics by period: day, week, month or extended",
+                "operationId": "getStatistics",
+                "parameters": [
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Statistics period",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "day",
+                            "enum": [
+                                "day",
+                                "week",
+                                "month"
+                            ]
+                        },
+                        "example": "day"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Statistics retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "period": {
+                                                    "type": "string",
+                                                    "example": "day"
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 13
+                                                },
+                                                "new": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "in_progress": {
+                                                    "type": "integer",
+                                                    "example": 6
+                                                },
+                                                "processed": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "start_date": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2026-01-23 00:00:00"
+                                                },
+                                                "end_date": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2026-01-23 14:26:49"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "cached": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/api/tickets": {
+            "post": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Create ticket",
+                "operationId": "294ca491dbeb1d9a5157b5dc2c76d055",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Иванов, Александр Викторович"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "format": "E.164",
+                                        "example": "+79991234567"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "test@gmail.com"
+                                    },
+                                    "subject": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "API"
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "maxLength": 2000,
+                                        "example": "Сообщение ..."
+                                    },
+                                    "attachments": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "format": "binary"
+                                        },
+                                        "maxItems": 5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successfully created.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ticket created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "ticket_id": {
+                                                    "type": "integer",
+                                                    "example": 14
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "new"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Too many requests"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Something went wrong"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Tickets",
+            "description": "Tickets"
+        }
+    ]
+}
